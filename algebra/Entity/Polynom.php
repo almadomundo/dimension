@@ -1,8 +1,22 @@
 <?php
+/**
+ * Provides functionality to describe algebraic polynom. Common structure:
+ * (Entity Coefficient #0)*A0^(Entity Power #0:0)*A1^(Entity Power #0:1)*... +
+ * (Entity Coefficient #1)*B0^(Entity Power #1:0)*B1^(Entity Power #1:1)*... +
+ * ...
+ */
 class Entity_Polynom extends Float_Operations
 {
+    /**
+     * Container for coefficient's structure
+     * @_rgData array
+     */
     protected $_rgData = [];
-    
+    /**
+     * 
+     * @param mixed $mData Structure with polynom data. Can be either array or string
+     * @param boolean $bResolveAsString Flag to resolve input structure as string instead of converting to array
+     */
     public function __construct($mData, $bResolveAsString=false)
     {
         if($bResolveAsString)
@@ -15,24 +29,40 @@ class Entity_Polynom extends Float_Operations
         }
         $this->groupMembers();
     }
-    
+    /**
+     * Get full polynom's data structure
+     * @return array
+     */
     public function getData()
     {
         return $this->_rgData;
     }
-    
+    /**
+     * Get sum of two polynoms
+     * @param mixed $mPolynom Polynom to sum with. If not an instance of polynom, conversion will be maded
+     * @return \self
+     */
     public function getSum($mPolynom)
     {
         $mPolynom   = self::convertToPolynom($mPolynom);
         return new self(array_merge($this->getData(), $mPolynom->getData()));
     }
-    
+    /**
+     * Get subtract of two polynoms
+     * @param self $mPolynom Polynom to subtract with. If not an instance of polynom, conversion will be maded
+     * @return \self
+     */
     public function getSubtract($mPolynom)
     {
         $mPolynom   = self::convertToPolynom($mPolynom);
         return $this->getSum($mPolynom->getProduct(-1));
     }
-    
+    /**
+     * Get power of polynom according to algebraic rules
+     * @param integer $iPower Positive integer number for power
+     * @return \self
+     * @throws LogicException If number is not integer or not positive
+     */
     public function getPower($iPower)
     {
         if(!is_int($iPower) || $iPower<0)
@@ -50,7 +80,11 @@ class Entity_Polynom extends Float_Operations
         }
         return $rPolynom;
     }
-    
+    /**
+     * Convert number to an instance of polynom
+     * @param double $fNumber A number to convert to instance of polynom
+     * @return null|\self
+     */
     public static function convertNumber($fNumber)
     {
         if(!is_numeric($fNumber))
@@ -63,7 +97,12 @@ class Entity_Polynom extends Float_Operations
         }
         return new self(['coef'=>Entity_Coefficient::convertNumber($fNumber), 'data'=>[]]);
     }
-    
+    /**
+     * Convert data to instance of polynom
+     * @param mixed $mCoef Either number or coefficient or polynom to convert to instance of self
+     * @return \self
+     * @throws Exception if data could not be converted to instance of polynom
+     */
     public static function convertToPolynom($mPolynom)
     {
         if($mPolynom instanceof Entity_Coefficient)
@@ -80,7 +119,12 @@ class Entity_Polynom extends Float_Operations
         }
         return $mPolynom;
     }
-    
+    /**
+     * Dump polynom as a string, formatting members with given rules
+     * @param boolean $bDumpFull Flag of full dumping. If true, all delimiters will bw shown even if algebraic rules allows to skip them
+     * @param null|array $mFormatter If set, this should be an array with delimiting rules. See Formatter_Polynom for examples
+     * @return string
+     */
     public function formatAsString($bDumpFull=false, $mFormatter=null)
     {
         if(!count($this->getData()))
@@ -91,13 +135,17 @@ class Entity_Polynom extends Float_Operations
         {
             $mFormatter = Formatter_Polynom::getPolynomFormat();
         }
-        //same in both cases?
-        //if($bDumpFull)
-        //{
-            return join($mFormatter[Formatter_Polynom::DELIMITER_MEMBER], Array_Operations::array_map_assoc($this->getData(), [$this,'formatExpression'], [$bDumpFull, $mFormatter]));
-        //}
+
+        return join($mFormatter[Formatter_Polynom::DELIMITER_MEMBER], Array_Operations::array_map_assoc($this->getData(), [$this,'formatExpression'], [$bDumpFull, $mFormatter]));
     }
-    
+    /**
+     * Dump a member as a string
+     * @param array $rgData Array containing member data
+     * @param mixed $iNumber Number of member in coefficient's structure
+     * @param boolean $bDumpFull Flag of full dumping. If true, all delimiters will bw shown even if algebraic rules allows to skip them
+     * @param null|array $mFormatter If set, this should be an array with delimiting rules. See Formatter_Polynom for examples
+     * @return string
+     */
     public function formatExpression($rgData, $iNumber=0, $bDumpFull=false, $mFormatter=null)
     {
         if(!isset($mFormatter))
@@ -134,7 +182,14 @@ class Entity_Polynom extends Float_Operations
         $sMembers   = join($mFormatter[Formatter_Polynom::DELIMITER_COEFFICIENT], Array_Operations::array_map_assoc($rgData['data'], [$this, 'formatPower'], [$bDumpFull, $mFormatter]));
         return $sCoef.$sMembers;
     }
-    
+    /**
+     * Dump a member power as a string
+     * @param double $fPower Power number
+     * @param string $mMember String of base representation
+     * @param boolean $bDumpFull Flag of full dumping. If true, all delimiters will bw shown even if algebraic rules allows to skip them
+     * @param null|array $mFormatter If set, this should be an array with delimiting rules. See Formatter_Polynom for examples
+     * @return string
+     */
     public function formatPower($mPower, $mMember, $bDumpFull=false, $mFormatter=null)
     {
         if(!isset($mFormatter))
@@ -170,7 +225,10 @@ class Entity_Polynom extends Float_Operations
         $sMember = str_replace('{member}', $mMember, $mFormatter[Formatter_Polynom::CONTAINER_MEMBER]);
         return $sMember.$sPower;
     }
-    
+    /**
+     * Group members of polynom according to algebraic rules
+     * @return \self
+     */
     public function groupMembers()
     {
         $rgGroup    = Array_Operations::array_split($this->getData(), function($rgItem)
@@ -203,7 +261,11 @@ class Entity_Polynom extends Float_Operations
         }, $this->_rgData);
         return $this;
     }
-    
+    /**
+     * Get product of two polynoms according to algebraic rules
+     * @param mixed $mCoef A polynom to multiple with. If it is not an instance of self, conversion will be maded
+     * @return \self
+     */
     public function getProduct($mPolynom)
     {
         $mPolynom   = self::convertToPolynom($mPolynom);

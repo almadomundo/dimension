@@ -1,7 +1,22 @@
 <?php
+/**
+ * Provides functionality to describe algebraic coefficient. Common structure:
+ * (Real Coefficient #0)*A0^(Real Power #0:0)*A1^(Real Power #0:1)*... +
+ * (Real Coefficient #1)*B0^(Real Power #1:0)*B1^(Real Power #1:1)*... +
+ * ...
+ */
 class Entity_Coefficient extends Float_Operations
 {
+    /**
+     * Container for coefficient's structure
+     * @_rgData array
+     */
     protected $_rgData = [];
+    /**
+     * 
+     * @param mixed $mData Structure with coefficient data. Can be either array or string
+     * @param boolean $bResolveAsString Flag to resolve input structure as string instead of converting to array
+     */
     public function __construct($mData, $bResolveAsString=false)
     {
         if($bResolveAsString)
@@ -14,7 +29,13 @@ class Entity_Coefficient extends Float_Operations
         }
         $this->groupMembers();
     }
-    
+    /**
+     * Compare two coefficients rX, rY and return -1 if rX<rY; 0 if rX=rY; 1 if rX>rY
+     * @param mixed $rX First coefficient in comparison pair
+     * @param mixed $rY Second coefficient in comparison pair
+     * @return integer
+     * @throws Exception if operands could not be traited as instance of coefficient
+     */
     public static function compareCoefs($rX, $rY)
     {
         if(is_numeric($rX))
@@ -27,9 +48,6 @@ class Entity_Coefficient extends Float_Operations
         }
         if($rX instanceof self && $rY instanceof self)
         {
-            //?
-            //$rX = new self($rX->getData());
-            //$rY = new self($rY->getData());
             $rgX    = $rX->getData();
             $rgY    = $rY->getData();
             usort($rgX, function($rgL, $rgR)
@@ -44,7 +62,12 @@ class Entity_Coefficient extends Float_Operations
         }
         throw new Exception('Unsupported operand types');
     }
-    
+    /**
+     * Convert data to instance of coefficient
+     * @param mixed $mCoef Either number or coefficient to convert to instance of self
+     * @return \self
+     * @throws Exception if data could not be converted to instance of coefficient
+     */
     public static function convertToCoef($mCoef)
     {
         if(is_numeric($mCoef))
@@ -57,7 +80,11 @@ class Entity_Coefficient extends Float_Operations
         }
         return $mCoef;
     }
-    
+    /**
+     * Convert coefficient to real number. If contains undefined values, null will be returned
+     * @param self $rCoef Coefficient, from which number will be extracted
+     * @return null|double
+     */
     public static function convertCoef(self $rCoef)
     {
         $rgCoef = $rCoef->getData();
@@ -67,7 +94,11 @@ class Entity_Coefficient extends Float_Operations
         }
         return null;
     }
-    
+    /**
+     * Convert number to an instance of coefficient
+     * @param double $fNumber A number to convert to instance of coefficient
+     * @return null|\self
+     */
     public static function convertNumber($fNumber)
     {
         if(!is_numeric($fNumber))
@@ -85,12 +116,20 @@ class Entity_Coefficient extends Float_Operations
     {
         return ['_rgData'];
     }
-    
+    /**
+     * Get full coefficient's data structure
+     * @return array
+     */
     public function getData()
     {
         return $this->_rgData;
     }
-    
+    /**
+     * Dump coefficient as a string, formatting members with given rules
+     * @param boolean $bDumpFull Flag of full dumping. If true, all delimiters will bw shown even if algebraic rules allows to skip them
+     * @param null|array $mFormatter If set, this should be an array with delimiting rules. See Formatter_Polynom for examples
+     * @return string
+     */
     public function formatAsString($bDumpFull=false, $mFormatter=null)
     {
         if(!isset($mFormatter))
@@ -99,7 +138,7 @@ class Entity_Coefficient extends Float_Operations
         }
         if(!count($this->getData()))
         {
-            return 0;
+            return '0';
         }
         if($bDumpFull)
         {
@@ -107,7 +146,14 @@ class Entity_Coefficient extends Float_Operations
         }
         return preg_replace('/^\s*\+\s*/', '', join('', Array_Operations::array_map_assoc($this->getData(), [$this,'formatExpression'], [$bDumpFull, $mFormatter])));
     }
-    
+    /**
+     * Dump a member as a string
+     * @param array $rgData Array containing member data
+     * @param mixed $iNumber Number of member in coefficient's structure
+     * @param boolean $bDumpFull Flag of full dumping. If true, all delimiters will bw shown even if algebraic rules allows to skip them
+     * @param null|array $mFormatter If set, this should be an array with delimiting rules. See Formatter_Polynom for examples
+     * @return string
+     */
     public function formatExpression($rgData, $iNumber=0, $bDumpFull=false, $mFormatter=null)
     {
         if(!isset($mFormatter))
@@ -141,7 +187,14 @@ class Entity_Coefficient extends Float_Operations
         }
         return $sCoef.$sMembers;
     }
-    
+    /**
+     * Dump a member power as a string
+     * @param double $fPower Power number
+     * @param string $mMember String of base representation
+     * @param boolean $bDumpFull Flag of full dumping. If true, all delimiters will bw shown even if algebraic rules allows to skip them
+     * @param null|array $mFormatter If set, this should be an array with delimiting rules. See Formatter_Polynom for examples
+     * @return string
+     */
     public function formatPower($fPower, $mMember, $bDumpFull=false, $mFormatter=null)
     {
         if(!isset($mFormatter))
@@ -176,19 +229,31 @@ class Entity_Coefficient extends Float_Operations
         $sMember    = str_replace('{member}',$mMember, $mFormatter[Formatter_Polynom::CONTAINER_MEMBER]);
         return $sMember.$sPower;
     }
-    
+    /**
+     * Get sum of two coefficients
+     * @param self $rCoef Coefficient to sum with
+     * @return \self
+     */
     public function getSum(self $rCoef)
     {
         return new self(array_merge($this->getData(), $rCoef->getData()));
     }
-    
+    /**
+     * Get subtract of two coefficients
+     * @param self $rCoef Coefficient to subtract with
+     * @return \self
+     */
     public function getSubtract($mCoef)
     {
         $mCoef   = self::convertToCoef($mCoef);
         return $this->getSum($mCoef->getProduct(-1));
     }
 
-
+    /**
+     * Direct add member to coefficient and group members. Deprecated since getSum() method provides same feature
+     * @param type $mMember
+     * @return type
+     */
     public function addMember($mMember)
     {
         if(!is_array($mMember))
@@ -198,7 +263,10 @@ class Entity_Coefficient extends Float_Operations
         $this->_rgData[]=$mMember;
         return $this->groupMembers();
     }
-    
+    /**
+     * Group members of coefficient according to algebraic rules
+     * @return \self
+     */
     public function groupMembers()
     {
         $rgGroup    = Array_Operations::array_split($this->getData(), function($rgItem)
@@ -229,7 +297,12 @@ class Entity_Coefficient extends Float_Operations
         }, $this->_rgData);
         return $this;
     }
-    
+    /**
+     * Get power of coefficient according to algebraic rules
+     * @param integer $iPower Positive integer number for power
+     * @return \self
+     * @throws LogicException If number is not integer or not positive
+     */
     public function getPower($iPower)
     {
         if(!is_int($iPower) || $iPower<0)
@@ -247,7 +320,11 @@ class Entity_Coefficient extends Float_Operations
         }
         return $rCoef;
     }
-    
+    /**
+     * Get product of two coefficients according to algebraic rules
+     * @param mixed $mCoef A coefficient to multiple with. If it is not an instance of self, conversion will be maded
+     * @return \self
+     */
     public function getProduct($mCoef)
     {
         if(is_numeric($mCoef))
