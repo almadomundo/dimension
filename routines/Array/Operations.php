@@ -1,6 +1,15 @@
 <?php
+/**
+ * Routines for array operations
+ */
 class Array_Operations extends Float_Operations
 {
+    /**
+     * Get sum of array's elements using user-defined callback function
+     * @param array $rgData
+     * @param callable $fnCallback
+     * @return null | array
+     */
     public static function array_usum($rgData, $fnCallback=null)    
     {
         if(!isset($fnCallback))
@@ -22,7 +31,13 @@ class Array_Operations extends Float_Operations
         }
         return $mResult;
     }
-    //always hated difference in order of callback-data in array_map/array_filter:
+    /**
+     * Map a function for all array's elements, using both key and value for each element. Either function or array could be passed in any order.
+     * @param mixed $mData
+     * @param mixed $mCallback
+     * @param array $mParams
+     * @return null | array
+     */
     public static function array_map_assoc($mData, $mCallback, $mParams=[])
     {
         $rgData     = [];
@@ -48,6 +63,13 @@ class Array_Operations extends Float_Operations
         }
         return $rgData;
     }
+    /**
+     * Split array for groups of elements using user-defined callback function
+     * @param array $rgData Array, elements of which will be splitted into groups
+     * @param callable $fnCallback Function for grouping elements of array
+     * @param boolean $bStoreGroup Flag to store value of callback in result array's keys
+     * @return null | array
+     */
     public static function array_split($rgData, $fnCallback, $bStoreGroup=false)
     {
        if(!is_callable($fnCallback))
@@ -85,7 +107,13 @@ class Array_Operations extends Float_Operations
        }
        return $bStoreGroup?$rgResult:array_values($rgResult);
     }
-    
+    /**
+     * Search key in an array, using user-defined function of comparing
+     * @param mixed $mItem Item, key of which should be found
+     * @param array $rgData Array to search in
+     * @param callable $fnCallback User-defined comparison function
+     * @return boolean | mixed
+     */
     public static function array_usearch($mItem, $rgData, $fnCallback=null)
     {
         if(!isset($fnCallback))
@@ -102,7 +130,13 @@ class Array_Operations extends Float_Operations
         }
         return false;//as in array_search, but bad practice to mix out-type
     }
-    
+    /**
+     * Determine if element belongs to an array, using user-defined comparison function 
+     * @param mixed $mItem Item, which is checking
+     * @param array $rgData Array to search in
+     * @param callable $fnCallback User-defined comparison function
+     * @return boolean
+     */
     public static function array_consists($mItem, $rgData, $fnCallback=null)
     {
         if(!isset($fnCallback))
@@ -118,7 +152,12 @@ class Array_Operations extends Float_Operations
         }
         return false;
     }
-    
+    /**
+     * Get unique array items, using user-defined comparison function
+     * @param array $rgData Array, consisting original data
+     * @param callable $fnCompare User-defined callback to compare elements
+     * @return null | array
+     */
     public static function array_uunique($rgData, $fnCompare=null)
     {
         if(!isset($fnCompare))
@@ -147,7 +186,12 @@ class Array_Operations extends Float_Operations
         }
         return $rgResult;
     }
-    
+    /**
+     * Returns decart product for array, excluding repeating
+     * @param array $rgData Array, consisting original data
+     * @param boolean $bPreserveOrder If true, result pair's key will be set to function, that was using for pair definition
+     * @return array
+     */
     public static function array_repeat_pair($rgData, $bPreserveOrder=false)
     {
         $rgRepeats  = array();
@@ -163,7 +207,10 @@ class Array_Operations extends Float_Operations
         }
         return $rgRepeats;
     }
-    
+    /**
+     * One of possible functions, that generates unique pair key
+     * @return int
+     */
     public static function get_pair_key()
     {
         $rgArgs = func_get_args();

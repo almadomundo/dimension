@@ -1,4 +1,7 @@
 <?php
+/**
+ * Provides equation solving methods. Preciese solution available up to 4 power
+ */
 class Equation_Real extends Float_Operations
 {
     const ROOT_EXACT = 'point';
@@ -7,10 +10,20 @@ class Equation_Real extends Float_Operations
     const ROOT_RANGE_TILL = 'range_till';
     const SOLVE_ALGEBRAIC = 1;
     const SOLVE_EXACT     = 0;
-
+    /**
+     * Store aligned power of equation:
+     * @_iPower integer 
+     */
     protected $_iPower = 0;
+    /**
+     * Store equation's coefficients:
+     * @_rgCoef array
+     */
     protected $_rgCoef = array();
-	
+    /**
+     * Construct equation from list or array
+     * @return null
+     */
     public function __construct()
     {
         $rgArgs = func_get_args();
@@ -33,7 +46,11 @@ class Equation_Real extends Float_Operations
             $this->_iPower--;
         }
     }
-
+    /**
+     * 
+     * @param int $mFlag Flag of solving. If solving is exact, real numbers will be returned
+     * @return null | array
+     */
     public function solveEquation($mFlag=self::SOLVE_EXACT)
     {
         $sMethod = '_solve_power_'.$this->_iPower;
@@ -43,7 +60,12 @@ class Equation_Real extends Float_Operations
         }
         return null;
     }
-    
+    /**
+     * [Deprecated] Dump equation as a string. Use polynom formatter instead.
+     * @param string $sVariable String to represent variable
+     * @param string $sPowerDelimiter String for delimiter of power
+     * @return string
+     */
     public function getAlgebraic($sVariable='z', $sPowerDelimiter='^')
     {
         $rgPrints = array();

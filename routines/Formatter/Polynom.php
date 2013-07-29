@@ -1,4 +1,7 @@
 <?php
+/**
+ * Class to format polynom as a string
+ */
 class Formatter_Polynom
 {
     const FORMAT_STRING             = 'raw';
@@ -16,7 +19,12 @@ class Formatter_Polynom
     const ENCLOSER_MEMBER_RIGHT     = 'enc_member_right';
     const ENCLOSER_COEFFICIENT_LEFT = 'enc_coef_left';
     const ENCLOSER_COEFFICIENT_RIGHT= 'enc_coef_right';
-    
+    /**
+     * Get an array for formatting
+     * @param string $sFormatType Type of formatter
+     * @return array
+     * @throws Exception If the corresponding formatter does not exist
+     */
     public static function getPolynomFormat($sFormatType=self::FORMAT_STRING)
     {
         $rgFormat = [
