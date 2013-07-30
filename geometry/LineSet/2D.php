@@ -1,10 +1,31 @@
 <?php
+/**
+ * This class was designed as a solution of "filling" problem, but now has
+ * useful functionality of creating polygons by set of lines
+ */
 class LineSet_2D extends Float_Operations
 {
-    protected $_rgLines         = array();
+    /**
+     * Original set of 2d-lines
+     * @_rgLines array
+     */
+    protected $_rgLines         = [];
+    /**
+     * Graph of partition using lines intersetion points
+     * @_rgPartition array | null 
+     */
     protected $_rgPartition     = null;
+    /**
+     * Result set of polygons
+     * @rgPolygons array | null
+     */
     protected $_rgPolygons      = null;
     
+    /**
+     * Create set of lines by gives array of lines
+     * @return null
+     * @throws LogicException If argument is not instance of 2d-line
+     */
     public function __construct()
     {
         $rgArgs = func_get_args();        
@@ -18,7 +39,13 @@ class LineSet_2D extends Float_Operations
         }
         $this->_rgLines = $rgLines;
     }
-    
+    /**
+     * Solution of "filling" problem. Returns true if plane filling from
+     * rPoint0 will reach rPoint1
+     * @param Point_2D $rPoint0 Start point of plane filling
+     * @param Point_2D $rPoint1 Test point
+     * @return boolean
+     */
     public function hasLink(Point_2D $rPoint0, Point_2D $rPoint1)
     {
         $rgPolygons = $this->getPolygons();
@@ -36,7 +63,10 @@ class LineSet_2D extends Float_Operations
         }
         return true;
     }
-    
+    /**
+     * Create polygons from original set of 2d-lines
+     * @return array
+     */
     public function getPolygons()
     {
         if(isset($this->_rgPolygons))
@@ -48,12 +78,18 @@ class LineSet_2D extends Float_Operations
         $this->_rgPolygons = Array_Operations::array_uunique($this->_rgPolygons, ['Polygon_2D', 'comparePolygons']);
         return $this->_rgPolygons;
     }
-    
+    /**
+     * Get original set of 2d-lines
+     * @return array
+     */
     public function getLines()
     {
         return $this->_rgLines;
     }
-    
+    /**
+     * Create partition graph from original set of 2d-lines
+     * @return array
+     */
     public function getPartition()
     {
         if(isset($this->_rgPartition))

@@ -6,7 +6,7 @@ Open-source math library that provides basic geometry and algebra features.
 There are some agreements in code. If you're going to modify code, please, 
 use them:
 * Code type-hinting: it's well-known that PHP has dynamic typing, but in most
-  cases you can assume type of a variable is the certain moment. Due to this
+  cases you can assume type of a variable in the certain moment. Due to this
   fact I'm using following type-hinting:
   * $iVar   : for integer variables
   * $fVar   : for float variables
