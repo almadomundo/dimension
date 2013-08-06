@@ -39,6 +39,16 @@ class LineSet_2D extends Float_Operations
         }
         $this->_rgLines = $rgLines;
     }
+    
+    /**
+     * Construct a set from array of elements
+     * @return \self
+     */
+    public static function createFromArray()
+    {
+        return call_user_func_array([new ReflectionClass(__CLASS__), 'newInstanceArgs'], func_get_args());
+    }
+    
     /**
      * Solution of "filling" problem. Returns true if plane filling from
      * rPoint0 will reach rPoint1
